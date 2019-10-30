@@ -6,35 +6,54 @@
 #include <string>
 #include <vector>
 #include <chrono>
+const int EXPONENT = 5;
+const int DATASETSIZE = 10;
+
 float generateRand(int rmax);
 int loadDataSet(int dataSetSize, float* v, const char* fileName);
 int writeDataSet(int dataSetSize, float* v, const char* fileName, float avg, float max, float min);
 void createDataSet(int dataSetSize, const char* fileName);
-void swap(int* xp, int* yp);
-void selectionSort(int arr[], int n);
+void swap(float* xp, float* yp);
+void selectionSort(float * v, int dataSetSize);
 float average(float* v, int dataSize);
 float maxValue(float* v, int dataSize);
 float minValue(float* v, int dataSize);
+void printTimes(const char* timeFile, int dataSetSize, long long load, long long avg, long long max, long long min, long long sort, long long write, long long total);
 
 //Input: DataSetSize, BufferSize, DatasetFilename, OutputFilename
 //Output : the file OutputFilename containing the sorted dataset.
 int main(int argc, char* argv[]) {
 	srand(static_cast<unsigned int>(time(0))); //initialize the random number generator
 	std::string filePath = "DataTest.txt";
-	int size = 100;
+	int size = pow(DATASETSIZE, EXPONENT);
 	float* v = new float[size];
 	createDataSet(size, filePath.c_str());
+
 	auto time1 = std::chrono::high_resolution_clock::now();
 	loadDataSet(size, v , filePath.c_str());
+	auto timeLoad = std::chrono::high_resolution_clock::now();
 	float avg = average(v, size);
+	auto timeAvg = std::chrono::high_resolution_clock::now();
 	float max = maxValue(v, size);
+	auto timeMax = std::chrono::high_resolution_clock::now();
 	float min = minValue(v, size);
-	printf("avg = %f\nmax = %f\nmin = %f\n",avg,max,min);
+	auto timeMin = std::chrono::high_resolution_clock::now();
+	selectionSort(v, size);
+	auto timeSort = std::chrono::high_resolution_clock::now();
 	writeDataSet(size, v , filePath.c_str(), avg, max, min);
-	auto time2 = std::chrono::high_resolution_clock::now();
-	auto ms = std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count();
-	float seconds = ms / 1000.0f;
-	printf("Time in s(%f)", seconds);
+	auto timeWrite = std::chrono::high_resolution_clock::now();
+
+	auto msLoad = std::chrono::duration_cast<std::chrono::microseconds>(timeLoad - time1).count();
+	auto msAvg = std::chrono::duration_cast<std::chrono::microseconds>(timeAvg - timeLoad).count();
+	auto msMax = std::chrono::duration_cast<std::chrono::microseconds>(timeMax - timeAvg).count();
+	auto msMin = std::chrono::duration_cast<std::chrono::microseconds>(timeMin - timeMax).count();
+	auto msSort = std::chrono::duration_cast<std::chrono::microseconds>(timeSort - timeMin).count();
+	auto msWrite = std::chrono::duration_cast<std::chrono::microseconds>(timeWrite - timeSort).count();
+	auto msTotal = std::chrono::duration_cast<std::chrono::microseconds>(timeWrite - time1).count();
+
+	printTimes("Unoptimized.txt", size, msLoad, msAvg, msMax, msMin, msSort, msWrite, msTotal);
+	printf("avg = %f\nmax = %f\nmin = %f\n", avg, max, min);
+	printf("Time in ms(%lld)", msTotal);
 	system("PAUSE");
 	return 0;
 }
@@ -93,7 +112,7 @@ int loadDataSet(int dataSetSize, float* outV, const char* fileName) {
 	return 1;
 }
 
-int writeDataSet(int dataSetSize, float * v,const char* fileName,float avg,float max,float min)
+int writeDataSet(int dataSetSize, float* v,const char* fileName,float avg,float max,float min)
 {
 	std::ofstream fileStream("test.txt");
 	if (fileStream.is_open()) {
@@ -118,24 +137,42 @@ void createDataSet(int dataSetSize, const char* fileName) {
 	fileStream.close();
 }
 
-void swap(int* xp, int* yp) {
-	int temp = *xp;
+void swap(float* xp, float* yp) {
+	float temp = *xp;
 	*xp = *yp;
 	*yp = temp;
 }
 
-void selectionSort(int arr[], int n) {
+void selectionSort(float * v, int dataSetSize) {
 	int min_idx;
 
-	for (int i = 0; i < n - 1; i++)
+	for (int i = 0; i < dataSetSize - 1; i++)
 	{
 
 		min_idx = i;
-		for (int j = i + 1; j < n; j++)
-			if (arr[j] < arr[min_idx])
+		for (int j = i + 1; j < dataSetSize; j++)
+			if (v[j] < v[min_idx])
 				min_idx = j;
 
-		swap(&arr[min_idx], &arr[i]);
+		//printf("swapping %f & %f\n", v[min_idx], v[i]);
+		swap(&v[min_idx], &v[i]);
+		//printf("swapped %f & %f\n", v[min_idx], v[i]);
 	}
 }
 
+void printTimes(const char* timeFile, int dataSetSize, long long load, long long avg, long long max, long long min, long long sort, long long write, long long total ) {
+	std::ofstream saveTime;
+	saveTime.open(timeFile, std::ios_base::app);
+	if (saveTime.is_open()) {
+		saveTime << "Dataset Size : " << dataSetSize << "." << std::endl;
+		saveTime << "Loading dataset time : " << load << " (ms)" << std::endl;
+		saveTime << "Avg value calculation time : " << avg << " (ms)" << std::endl;
+		saveTime << "Max value calculation time : " << max << " (ms)" << std::endl;
+		saveTime << "Min value calculation time : " << min << " (ms)" << std::endl;
+		saveTime << "Sorting time : " << sort << " (ms)" << std::endl;
+		saveTime << "Write sorted dataset time : " << write << " (ms)" << std::endl;
+		saveTime << "Total operation time : " << total << " (ms)" << std::endl;
+		saveTime << "--------------------------" << std::endl;
+	}
+	saveTime.close();
+}
