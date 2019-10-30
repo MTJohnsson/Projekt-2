@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="PerformanceOptimization-Project2.cpp">
+    <ClCompile Include="%28First%29PerformanceOptimization-Project2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
