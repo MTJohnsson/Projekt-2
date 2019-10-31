@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 	auto msWrite = std::chrono::duration_cast<std::chrono::microseconds>(timeWrite - timeSort).count();
 	auto msTotal = std::chrono::duration_cast<std::chrono::microseconds>(timeWrite - time1).count();
 
-	printTimes("Unoptimized.txt", size, msLoad, msAvg, msMax, msMin, msSort, msWrite, msTotal);
+	printTimes("Unoptimized-Third.txt", size, msLoad, msAvg, msMax, msMin, msSort, msWrite, msTotal);
 	literateDataSet(size, v, "readable-test.txt", avg, max, min);
 	//printf("avg = %f\nmax = %f\nmin = %f\n", avg, max, min);
 	//printf("Time in ms(%lld)", msTotal);
