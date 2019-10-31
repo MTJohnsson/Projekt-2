@@ -29,7 +29,6 @@ void literateDataSet(int dataSetSize, float* v, const char* fileName, float avg,
 int main(int argc, char* argv[]) {
 	srand(static_cast<unsigned int>(time(0))); //initialize the random number generator
 	std::string filePath = "DataTest.txt";
-	//int size = 100;
 	int size = pow(DATASETSIZE, EXPONENT);
 	int nrOfBlocks = (size * sizeof(float)) / BLOCKSIZE;
 	if ((size * sizeof(float)) % BLOCKSIZE != 0)
@@ -46,7 +45,6 @@ int main(int argc, char* argv[]) {
 	auto timeMax = std::chrono::high_resolution_clock::now();
 	float min = minValue(v, size);
 	auto timeMin = std::chrono::high_resolution_clock::now();
-	//selectionSort(v, size);
 	quickSort(v, size, 0, size-1);
 	auto timeSort = std::chrono::high_resolution_clock::now();
 	writeDataSet(size, v, "test.txt", avg, max, min);
@@ -62,8 +60,6 @@ int main(int argc, char* argv[]) {
 
 	printTimes("Unoptimized-Third.txt", size, msLoad, msAvg, msMax, msMin, msSort, msWrite, msTotal);
 	literateDataSet(size, v, "readable-test.txt", avg, max, min);
-	//printf("avg = %f\nmax = %f\nmin = %f\n", avg, max, min);
-	//printf("Time in ms(%lld)", msTotal);
 	system("PAUSE");
 	return 0;
 }
