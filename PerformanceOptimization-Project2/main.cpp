@@ -8,6 +8,7 @@
 #include <chrono>
 const int EXPONENT = 5;
 const int DATASETSIZE = 10;
+const int BLOCKSIZE = 4096;
 
 float generateRand(int rmax);
 int loadDataSet(int dataSetSize, float* v, const char* fileName);
@@ -20,14 +21,20 @@ float maxValue(float* v, int dataSize);
 float minValue(float* v, int dataSize);
 void printTimes(const char* timeFile, int dataSetSize, long long load, long long avg, long long max, long long min, long long sort, long long write, long long total);
 void quickSort(float* arr, float size, int low, int high);
-int partition(float arr[], float size, int low, int high);
+int partition(float* arr, float size, int low, int high);
+void literateDataSet(int dataSetSize, float* v, const char* fileName, float avg, float max, float min);
+
 //Input: DataSetSize, BufferSize, DatasetFilename, OutputFilename
 //Output : the file OutputFilename containing the sorted dataset.
 int main(int argc, char* argv[]) {
 	srand(static_cast<unsigned int>(time(0))); //initialize the random number generator
 	std::string filePath = "DataTest.txt";
+	//int size = 100;
 	int size = pow(DATASETSIZE, EXPONENT);
-	float* v = new float[size];
+	int nrOfBlocks = (size * sizeof(float)) / BLOCKSIZE;
+	if ((size * sizeof(float)) % BLOCKSIZE != 0)
+		nrOfBlocks++;
+	float* v = new float[BLOCKSIZE * nrOfBlocks];
 	createDataSet(size, filePath.c_str());
 
 	auto time1 = std::chrono::high_resolution_clock::now();
@@ -42,7 +49,7 @@ int main(int argc, char* argv[]) {
 	//selectionSort(v, size);
 	quickSort(v, size, 0, size-1);
 	auto timeSort = std::chrono::high_resolution_clock::now();
-	writeDataSet(size, v, filePath.c_str(), avg, max, min);
+	writeDataSet(size, v, "test.txt", avg, max, min);
 	auto timeWrite = std::chrono::high_resolution_clock::now();
 
 	auto msLoad = std::chrono::duration_cast<std::chrono::microseconds>(timeLoad - time1).count();
@@ -54,8 +61,9 @@ int main(int argc, char* argv[]) {
 	auto msTotal = std::chrono::duration_cast<std::chrono::microseconds>(timeWrite - time1).count();
 
 	printTimes("Unoptimized.txt", size, msLoad, msAvg, msMax, msMin, msSort, msWrite, msTotal);
-	printf("avg = %f\nmax = %f\nmin = %f\n", avg, max, min);
-	printf("Time in ms(%lld)", msTotal);
+	literateDataSet(size, v, "readable-test.txt", avg, max, min);
+	//printf("avg = %f\nmax = %f\nmin = %f\n", avg, max, min);
+	//printf("Time in ms(%lld)", msTotal);
 	system("PAUSE");
 	return 0;
 }
@@ -101,7 +109,7 @@ float average(float* v, int dataSize)
 }
 
 int loadDataSet(int dataSetSize, float* outV, const char* fileName) {
-	std::ifstream file;
+	/*std::ifstream file;
 
 	file.open(fileName);
 	int number = 0;
@@ -110,13 +118,34 @@ int loadDataSet(int dataSetSize, float* outV, const char* fileName) {
 		number++;
 	}
 	printf("\n");
-	file.close();
+	file.close();*/
+
+	/*std::fstream backing;
+	backing.open(fileName, std::ios::in | std::ios::binary);
+	backing.read(reinterpret_cast<char*>(&outV[0]), sizeof(float) * dataSetSize);
+	backing.close();*/
+	int blockSize = 4096;
+	int nrOfBlocks = (dataSetSize * sizeof(float)) / blockSize;
+	if ((dataSetSize * sizeof(float)) % blockSize != 0) {
+		nrOfBlocks++;
+	}
+	std::fstream loading;
+	loading.open(fileName, std::ios::in | std::ios::binary);
+	for (int i = 0; i < nrOfBlocks; i++) {
+		loading.seekg(blockSize * i, loading.beg);
+		loading.read((char*)(&outV[i * (blockSize / sizeof(float))]), blockSize);
+	}
+	/*for (int i = 0; i < dataSetSize; i++) {
+		printf(" outV[%i] : %f", i, outV[i]);
+	}*/
+	loading.close();
+
 	return 1;
 }
 
 int writeDataSet(int dataSetSize, float* v, const char* fileName, float avg, float max, float min)
 {
-	std::ofstream fileStream("test.txt");
+	/*std::ofstream fileStream(fileName);
 	if (fileStream.is_open()) {
 		fileStream << "avg : " << avg << std::endl << "max : " << max << std::endl << "min : " << min << std::endl;
 		for (int i = 0; i < dataSetSize; i++)
@@ -124,19 +153,69 @@ int writeDataSet(int dataSetSize, float* v, const char* fileName, float avg, flo
 			fileStream << v[i] << std::endl;
 		}
 	}
-	fileStream.close();
+	fileStream.close();*/
+	int blockSize = 4096;
+	int nrOfBlocks = (dataSetSize * sizeof(float)) / blockSize;
+	if ((dataSetSize * sizeof(float)) % blockSize != 0) {
+		nrOfBlocks++;
+	}
+	std::fstream writing;
+	writing.open(fileName, std::ios_base::out | std::ios::binary);
+	writing.seekg((sizeof(float) * 0), writing.beg);
+	writing.write((char*)(&avg), sizeof(float));
+	writing.seekg((sizeof(float) * 1), writing.beg);
+	writing.write((char*)(&max), sizeof(float));
+	writing.seekg((sizeof(float) * 2), writing.beg);
+	writing.write((char*)(&min), sizeof(float));
+
+	for (int i = 0; i < nrOfBlocks; i++) {
+		writing.seekg((sizeof(float)*3) + blockSize * i, writing.beg);
+		writing.write((char*)(&v[i * (blockSize / sizeof(float))]), blockSize);
+	}
+	writing.close();
+
 	return(0);
 }
 
 void createDataSet(int dataSetSize, const char* fileName) {
-	std::ofstream fileStream(fileName);
+	/*std::ofstream fileStream(fileName);
 	if (fileStream.is_open()) {
 		for (int i = 0; i < dataSetSize; i++)
 		{
 			fileStream << generateRand(100) << std::endl;
 		}
 	}
-	fileStream.close();
+	fileStream.close();*/
+	int blockSize = 4096;
+	int nrOfBlocks = (dataSetSize * sizeof(float)) / blockSize;
+	if ((dataSetSize * sizeof(float)) % blockSize != 0) {
+		nrOfBlocks++;
+	}
+	std::fstream creating;
+	float *v = new float[dataSetSize];
+	for (int i = 0; i < dataSetSize; i++)
+	{
+		v[i] = generateRand(100);
+		//printf("outV[%i] : %f", i, v[i]);
+	}
+	creating.open(fileName, std::ios_base::out | std::ios_base::binary);
+	for (int i = 0; i < nrOfBlocks; i++) {
+		creating.seekg(blockSize * i, creating.beg);
+		creating.write((char*)(&v[i * (blockSize/sizeof(float))]), blockSize);
+
+	}
+	creating.close();
+
+	//std::fstream creating;
+	//float *v = new float[dataSetSize];
+	//for (int i = 0; i < dataSetSize; i++)
+	//{
+	//	v[i] = generateRand(100);
+	//	//printf("outV[%i] : %f", i, v[i]);
+	//}
+	//creating.open(fileName, std::ios_base::out | std::ios_base::binary);
+	//creating.write(reinterpret_cast<char*>(&v[0]), sizeof(float)*dataSetSize);
+	//creating.close();
 }
 
 void swap(float* xp, float* yp) {
@@ -162,17 +241,16 @@ void selectionSort(float* v, int dataSetSize) {
 	}
 }
 
-int partition(float arr[], float size,int low, int high)
+int partition(float* arr, float size,int low, int high)
 {
-	int pivot = arr[high]; // pivot  
-	int i = (low - 1); // Index of smaller element  
+	float pivot = arr[high];
+	int i = (low - 1);  
 
 	for (int j = low; j <= high - 1; j++)
 	{
-		// If current element is smaller than the pivot  
 		if (arr[j] < pivot)
 		{
-			i++; // increment index of smaller element  
+			i++; 
 			swap(&arr[i], &arr[j]);
 		}
 	}
@@ -180,25 +258,16 @@ int partition(float arr[], float size,int low, int high)
 	return (i + 1);
 }
 
-/* The main function that implements QuickSort
-arr[] --> Array to be sorted,
-low --> Starting index,
-high --> Ending index */
 void quickSort(float *arr, float size, int low, int high)
 {
 	if (low < high)
 	{
-		/* pi is partitioning index, arr[p] is now
-		at right place */
 		int pi = partition(arr, size, low, high);
 
-		// Separately sort elements before  
-		// partition and after partition  
 		quickSort(arr, size, low, pi - 1);
 		quickSort(arr, size, pi + 1, high);
 	}
 }
-
 
 void printTimes(const char* timeFile, int dataSetSize, long long load, long long avg, long long max, long long min, long long sort, long long write, long long total) {
 	std::ofstream saveTime;
@@ -215,4 +284,17 @@ void printTimes(const char* timeFile, int dataSetSize, long long load, long long
 		saveTime << "--------------------------" << std::endl;
 	}
 	saveTime.close();
+}
+
+void literateDataSet(int dataSetSize, float* v, const char* fileName, float avg, float max, float min) {
+
+	std::ofstream fileStream(fileName);
+	if (fileStream.is_open()) {
+		fileStream << "avg : " << avg << std::endl << "max : " << max << std::endl << "min : " << min << std::endl;
+		for (int i = 0; i < dataSetSize; i++)
+		{
+			fileStream << v[i] << std::endl;
+		}
+	}
+	fileStream.close();
 }
