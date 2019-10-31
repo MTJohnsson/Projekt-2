@@ -1,0 +1,9 @@
+Dataset Size : 100000.
+Loading dataset time : 268806 (ms)
+Avg value calculation time : 238 (ms)
+Max value calculation time : 124 (ms)
+Min value calculation time : 125 (ms)
+Sorting time : 7111122 (ms)
+Write sorted dataset time : 775836 (ms)
+Total operation time : 8156253 (ms)
+--------------------------

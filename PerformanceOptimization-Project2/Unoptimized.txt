@@ -1,0 +1,54 @@
+Dataset Size : 100000.
+Loading dataset time : 238494 (ms)
+Avg value calculation time : 237 (ms)
+Max value calculation time : 122 (ms)
+Min value calculation time : 124 (ms)
+Sorting time : 7116070 (ms)
+Write sorted dataset time : 749235 (ms)
+Total operation time : 8104284 (ms)
+--------------------------
+Dataset Size : 100000.
+Loading dataset time : 259919 (ms)
+Avg value calculation time : 238 (ms)
+Max value calculation time : 123 (ms)
+Min value calculation time : 131 (ms)
+Sorting time : 84596 (ms)
+Write sorted dataset time : 775413 (ms)
+Total operation time : 1120422 (ms)
+--------------------------
+Dataset Size : 100000.
+Loading dataset time : 251975 (ms)
+Avg value calculation time : 237 (ms)
+Max value calculation time : 123 (ms)
+Min value calculation time : 125 (ms)
+Sorting time : 82004 (ms)
+Write sorted dataset time : 804140 (ms)
+Total operation time : 1138607 (ms)
+--------------------------
+Dataset Size : 100000.
+Loading dataset time : 238926 (ms)
+Avg value calculation time : 240 (ms)
+Max value calculation time : 125 (ms)
+Min value calculation time : 124 (ms)
+Sorting time : 78777 (ms)
+Write sorted dataset time : 799964 (ms)
+Total operation time : 1118159 (ms)
+--------------------------
+Dataset Size : 100000.
+Loading dataset time : 371917 (ms)
+Avg value calculation time : 238 (ms)
+Max value calculation time : 123 (ms)
+Min value calculation time : 127 (ms)
+Sorting time : 93870 (ms)
+Write sorted dataset time : 884461 (ms)
+Total operation time : 1350738 (ms)
+--------------------------
+Dataset Size : 100000.
+Loading dataset time : 298641 (ms)
+Avg value calculation time : 237 (ms)
+Max value calculation time : 123 (ms)
+Min value calculation time : 127 (ms)
+Sorting time : 80217 (ms)
+Write sorted dataset time : 857220 (ms)
+Total operation time : 1236567 (ms)
+--------------------------
